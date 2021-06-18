@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Share me</title>
+    <script type="text/javascript">
+        let api = {
+            async addNewLink(link) {
+                await fetch('/links', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({link}),
+                });
+            },
+
+            async getLinks() {
+                let response = await fetch('/links', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                return await response.json();
+            },
+        };
+
+        async function addNewLink() {
+            let newLink = document.getElementById('newLink').value;
+            await api.addNewLink(newLink);
+            let links = (await api.getLinks()).links;
+            let linksListEl = document.getElementById('linksList');
+            let children = Array.of(...linksListEl.children);
+            for (let item of children) {
+                item.parentNode.removeChild(item);
+            }
+            for (let link of links) {
+                let li = document.createElement('li');
+                let a = document.createElement('a');
+                a.setAttribute('href', link);
+                a.appendChild(document.createTextNode(link));
+                li.appendChild(a);
+                linksListEl.appendChild(li);
+            }
+        }
+    </script>
+</head>
+<body>
+<ul id="linksList">
+    {{#each links}}
+    <li><a href="{{this}}">{{this}}</a></li>
+    {{/each}}
+</ul>
+
+<label for="newLink">New link</label>
+<input id="newLink" type="text" placeholder="New link">
+<input type="button" value="Add" onclick="addNewLink();">
+
+</body>
+</html>
